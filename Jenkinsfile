@@ -8,37 +8,31 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
+        stage('Checkout Github') {
             steps {
-                git 'https://github.com/YOUR_GITHUB/simple-node-js-react-npm-app.git'
+                git credentialsId: 'jen-doc-git', url: 'https://github.com/HtetAungShine6/simple-node-js-react-npm-app.git'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Install Node Dependencies') {
             steps {
                 sh 'npm install'
             }
         }
 
-        stage('Build App') {
+        stage('Test Code') {
             steps {
-                sh 'npm run build || true'
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t $IMAGE_NAME:latest .'
-            }
-        }
-
-        stage('Push to DockerHub') {
-            steps {
-                sh '''
-                echo $DOCKERHUB_CREDS_PSW | docker login -u $DOCKERHUB_CREDS_USR --password-stdin
-                docker push $IMAGE_NAME:latest
-                '''
+                sh 'npm test'
             }
         }
     }
+
+	post {
+		success {
+			echo 'Build successful!'
+		}
+		failure {
+			echo 'Build failed. Please check the logs for details.'
+		}
+	}
 }
